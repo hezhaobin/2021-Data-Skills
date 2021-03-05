@@ -22,7 +22,7 @@ Answer Questions
 ----------------
 You may need to review the [GTF](https://useast.ensembl.org/info/website/upload/gff.html) (General Transfer Format) file format to know which column to use to answer the following questions.
 - How many genes are there in this build of the human genome?
-- Now let’s pick a gene and learn a bit more about it. If you don't have a favorite gene, try "FOXP1", a gene that encodes a transcription factor linked to human language development (see [here](https://www.sciencedirect.com/science/article/pii/S096098221831546X) but see disputes [here](https://doi.org/10.1016/j.cell.2018.06.048))
+- Now let’s pick a gene and learn a bit more about it. If you don't have a favorite gene, try "FOXP2", a gene that encodes a transcription factor linked to human language development (see [here](https://www.sciencedirect.com/science/article/pii/S096098221831546X) but see disputes [here](https://doi.org/10.1016/j.cell.2018.06.048))
     - first, let's extract the information pertaining to the gene we chose:
         1. First select all lines that contain the gene name; 
         1. Then select those lines from the last step that contain the word “protein_coding”;
