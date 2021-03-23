@@ -1,0 +1,277 @@
+---
+title: Manipulating and visualizing data
+date: 2020-03-10
+authors: Emma Bradbury, Carina Donne, Bin He
+output:
+  html_document:
+    toc: true
+    toc_float: true
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This workshop is entirely based on the [R Ecology Lesson](https://datacarpentry.org/R-ecology-lesson/03-dplyr.html) on DataCamp
+
+# Introduction to `tidyverse`
+
+In this workshop we will learn a new way of manipulating data frames. The package we will use for it is called "tidyverse". Let's first install it.
+
+```{r prepare_environment}
+# install.packages("tidyverse")
+require(tidyverse)
+```
+
+Now let's recall how you would index and subset a data frame using the "bracket subsetting" method, which is provided by the default R environment.
+
+```{r indexing_and_subsetting, eval=FALSE}
+surveys[1,1]            #
+surveys[1,6]            #
+# the commands below (without the str()) result in large amount of output
+# we use str() to take a peek into it. it also helps us to understand the data type
+# each command gives
+str(surveys[ ,1])       # 
+str(surveys[1])         #
+str(surveys[1:3,7])          # 
+str(surveys[,-1])            # 
+str(surveys["species_id"])   # 
+str(surveys[,"species_id"])  # 
+```
+
+The `tidyverse` package tries to address 3 common issues that arise when doing data analysis with some of the functions that come with R:
+
+- The results from a base R function sometimes depend on the type of data.
+- Using R expressions in a non standard way, which can be confusing for new learners.
+- Hidden arguments, having default operations that new learners are not aware of.
+
+# Loading data using `tidyr`
+
+Now let's begin. First, we load the data, using a special function from the `tidyr` package, which is part of the `tidyverse`
+
+```{r load_data}
+# note how this function is d different name compared to the R stock function read.csv()
+surveys <- read_csv("data_raw/portal_data_joined.csv")
+# inspect the data
+str(surveys)
+# preview the data
+# View(surveys)
+```
+
+note that the class of the data is now `tbl_df`, which stands for tibble data frame. Below are some salient differences between a tibble and the default data frame:
+
+- In addition to displaying the data type of each column under its name, it only prints the first few rows of data and only as many columns as fit on one screen.
+- Columns of class `character` are *never* converted into factors.
+
+# Manipulating data using `dplyr`
+
+We’re going to learn some of the most common `dplyr` (part of `tidyverse`, used for manipulating data) functions:
+
+- `select()`: subset columns
+- `filter()`: subset rows on conditions
+- `mutate()`: create new columns by using information from other columns
+- `group_by()` and `summarize()`: create summary statisitcs on grouped data
+- `arrange()`: sort results
+- `count()`: count discrete values
+
+## Selecting columns and filtering rows
+
+```{r select_columns_and_filtering_rows}
+# The first argument of select() is the data frame (surveys), and subsequent arguments are the column names (no quotes)
+select(surveys, plot_id, species_id, weight)
+# To select all columns except certain ones, put a “-” in front of the variable to exclude it.
+select(surveys, -record_id, -species_id)
+# To choose rows based on a specific criteria, use filter():
+filter(surveys, year == 1995)
+```
+
+## Using pipes, yeah!
+
+Remember how pipes are useful for constructing a sequence of operations in Unix. `tidyverse` contains a package called `magrittr` that brings the pipes into R!
+
+So when would you want to use pipes? How is it helpful? Let's look at the example below
+
+```{r pipes}
+# not using pipes, trying to first filter and then select
+surveys2 <- filter(surveys, weight < 5)
+surveys_sml <- select(surveys2, species_id, sex, weight)
+# notice how this is very similar to Unix, where you can store the intermediate results in files (here in R objects, aka variables)
+# sometimes you will read (or construct) "nested" commnads as below, which allows you to do two things on one line:
+surveys_sml <- select(filter(surveys, weight < 5), species_id, sex, weight)
+# the problem is, this command will quickly become unreadable and prone to typing errors as the number of operations increase
+
+# now let's look at how pipes can simplify this and make the code a lot more readable!
+surveys %>%
+  filter(weight < 5) %>%
+  select(species_id, sex, weight)
+# isn't this elegant?
+```
+
+### Some tips for typing pipes:
+
+If you use RStudio, you can type the pipe sign, '%>%' with Ctrl+Shift+M on a PC, or Cmd+Shift+M on a Mac.
+
+In the above code, we use the pipe to send the surveys dataset first through `filter()` to keep rows where weight is less than 5, then through `select()` to keep only the species_id, sex, and weight columns. Since `%>%` takes the object on its left and passes it as the first argument to the function on its right, we don’t need to explicitly include the data frame as an argument to the `filter()` and `select()` functions any more.
+
+Some may find it helpful to read the pipe like the word “then”. For instance, in the above example, we took the data frame surveys, then we filtered for rows with weight < 5, then we selected columns `species_id`, `sex`, and `weight`. The `dplyr` functions by themselves are somewhat simple, but by combining them into linear workflows with the pipe, we can accomplish more complex manipulations of data frames.
+
+It is important to know that the above commands DON'T change the original data frame! In order to save the changes, you MUST assign the output to a new variable, like the following
+
+```{r save_objects_when_using_pipes}
+surveys_sml <- surveys %>%
+  filter(weight < 5) %>%
+  select(species_id, sex, weight)
+
+surveys_sml
+```
+
+### Challenge
+
+Using pipes, subset the `surveys` data to include animals collected before 1995 and retain only the columns `year`, `sex`, and `weight`.
+
+```{r pipes_challenge}
+# test your knowledge here
+
+```
+
+## Mutate
+
+Frequently you’ll want to create new columns based on the values in existing columns, for example to do unit conversions, or to find the ratio of values in two columns. For this we’ll use `mutate()`.
+
+```{r mutate}
+# To create a new column of weight in kg:
+surveys %>%
+  mutate(weight_kg = weight / 1000)
+
+# You can also create a second new column based on the first new column within the same call of mutate():
+surveys %>%
+  mutate(weight_kg = weight / 1000,
+         weight_lb = weight_kg * 2.2)
+
+# If this runs off your screen and you just want to see the first few rows, you can use a pipe to view the head() of the data. (Pipes work with non-dplyr functions, too, as long as the dplyr or magrittr package is loaded).
+surveys %>%
+  mutate(weight_kg = weight / 1000) %>%
+  head()
+
+# The first few rows of the output are full of NAs, so if we wanted to remove those we could insert a filter() in the chain:
+surveys %>%
+  filter(!is.na(weight)) %>%
+  mutate(weight_kg = weight / 1000) %>%
+  head()
+```
+
+Again, note that the `mutate()` function doesn't actually CHANGE the original data frame. In order to save the changes, you MUST save the output to a new object.
+
+### Challenge
+
+Create a new data frame from the `surveys` data that meets the following criteria: contains only the `species_id` column and a new column called `hindfoot_half` containing values that are half the `hindfoot_length` values. In this `hindfoot_half` column, there are no `NAs` and all values are less than 30.
+
+```{r mutate_challenge}
+# test here
+
+```
+
+## Split-apply-combine data analysis and the `summarize()` function
+
+A frequent task in data manipulation is to summarize information based on some grouping criteria. For example, if you have a collection of historical temperature records for a region, you may want to get the minimum and maximum temperature in each month. To do so, you will need to group the data by month and calculate the min and max of the temperature column. Such actions can be easily accomplished with the `group_by()` and `summarize()` function in `dplyr`. Below are some examples:
+
+### The `summarize` function
+
+```{r summarize}
+# The goal is to calculate the mean weight for male and female anmimals separately
+surveys %>%
+  group_by(sex) %>%
+  summarize(mean_weight = mean(weight, na.rm = TRUE))
+
+# How about group by sex and species?
+surveys %>%
+  group_by(sex, species) %>%
+  summarize(mean_weight = mean(weight, na.rm = TRUE))
+
+# how do you look at the last few rows of the output above?
+surveys %>%
+  group_by(sex) %>%
+  summarize(mean_weight = mean(weight, na.rm = TRUE)) %>% 
+  tail()
+
+# Notice how the last few rows contains records where the animals escaped before sex and 
+# weight can be determined. Notice also how the mean_weight is not NA but NaN (not a number)
+# Why is that? How can you avoid that?
+surveys %>%
+  group_by(sex, species) %>%
+  filter(!is.na(weight)) %>% 
+  summarize(mean_weight = mean(weight, na.rm = TRUE))
+
+# Once you group the data, you can also summarize multiple variables
+surveys %>%
+  filter(!is.na(weight)) %>%
+  group_by(sex, species_id) %>%
+  summarize(mean_weight = mean(weight),
+            min_weight = min(weight))
+
+# What if I want to sort the results by minimum weight?
+surveys %>%
+  filter(!is.na(weight)) %>%
+  group_by(sex, species_id) %>%
+  summarize(mean_weight = mean(weight),
+            min_weight = min(weight)) %>%
+  arrange(min_weight)
+# How about in descending order (biggest number first)?
+surveys %>%
+  filter(!is.na(weight)) %>%
+  group_by(sex, species_id) %>%
+  summarize(mean_weight = mean(weight),
+            min_weight = min(weight)) %>%
+  arrange(desc(min_weight))
+```
+
+### Counting
+When working with data, we often want to know the number of observations found for each factor or combination of factors. For this task, `dplyr` provides `count()`. For example, if we wanted to count the number of rows of data for each sex, we would do:
+
+```{r counting}
+surveys %>% count(sex)
+# can you do the same with what we have learned so far?
+surveys %>%
+    group_by(sex) %>%
+    summarise(count = n())
+
+# For convenience, count() provides the sort argument:
+surveys %>% 
+  count(sex, sort = TRUE)
+
+# We can also count multiple factors
+surveys %>% 
+  count(sex, species)
+
+# And we can further sort the output above
+surveys %>% 
+  count(sex, species) %>% 
+  arrange(species, desc(n))
+```
+
+### Challenge
+
+```{r summarize_challenge}
+# 1. How many animals were caught in each plot_type surveyed?
+surveys %>% 
+  count(plot_type)
+
+# 2. Use group_by() and summarize() to find the mean, min, and max hindfoot length for each species (using species_id). Also add the number of observations (hint: see ?n).
+surveys %>% 
+  group_by(species_id) %>% 
+  filter(!is.na(hindfoot_length)) %>% 
+  summarize(mean = mean(hindfoot_length),
+            min = min(hindfoot_length),
+            max = max(hindfoot_length),
+            n = n())
+
+# 3. What was the heaviest animal measured in each year? Return the columns year, genus, species_id, and weight.
+surveys %>% 
+  filter(!is.na(weight)) %>% 
+  group_by(year) %>% 
+  filter(weight == max(weight)) %>% 
+  select(year, genus, species_id, weight) %>% 
+  arrange(weight)
+```

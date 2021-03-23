@@ -1,0 +1,22 @@
+# Unit 3 Seeking Help
+## Reading help files
+
+For help in understanding what a function does, simply type:
+```{r}
+help(function_name)
+```
+This will open a help page on your bottom right window explaining what the function does. For example, if you type help(c), the window will explain that c is a function which combines values into a vector list
+If you need help making with R markdown, there's a help tab at the very top which you can click and then click "Markdown quick reference"
+
+## Special Operators
+For help on these just put them in quotes:
+```{r}
+"<-"
+``` 
+
+## Vignettes 
+Vignettes are tutorials and extended example documentation
+
+## Finding a function 
+If you don't remember how to spell a function name, R studio will fill it in for you if you have enough letters. ??pas will become ??paste
+

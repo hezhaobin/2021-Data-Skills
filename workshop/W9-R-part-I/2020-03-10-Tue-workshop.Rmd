@@ -1,0 +1,473 @@
+---
+title: A Rapid Introduction to R
+date: 2020-03-08
+authors: Emma Bradbury, Carina Donne, Bin He
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+
+Intro to R and RStudio
+======================
+
+This part of the workshop is based on the following source
+
+- [http://swcarpentry.github.io/r-novice-gapminder/01-rstudio-intro/index.html](http://swcarpentry.github.io/r-novice-gapminder/01-rstudio-intro/index.html)
+ 
+## R studio setup: 
+
+- Fastx: Applications -> Statistics ->Rstudio 
+- Personal computer: follow the instructions here
+    [https://datacarpentry.org/R-ecology-lesson/index.html](https://datacarpentry.org/R-ecology-lesson/index.html)
+
+
+## How to use (interact with) R?
+
+### R from the command line
+
+To use the interactive console for R, type `$ R` and enter. 
+To exit, type `q("no")`
+
+### Rstudio (what this workshop will be working in) 
+
+_Introduction_
+
+4 Panes
+![RStudio UI](http://swcarpentry.github.io/r-novice-gapminder/fig/01-rstudio-script.png)
+
+- Source (top left)
+- Environment/ History (top right)
+- Console (bottom left) 
+- Files/Plots/Packages/Help/Viewer (bottom right)
+
+_Usage guide_
+
+1. Start RStudio.
+2. Under the File menu, click on New Project. Choose New Directory, then New Project.
+3. Enter a name for this new folder (or "directory"), and choose a convenient location for it. This will be your **working directory** for the rest of the day (e.g., ~/data-carpentry).
+4. Click on Create Project.
+5. Create new folder "data" 
+
+## Creating objects 
+
+- Known as variables in other programming languages 
+- Simple math 
+    - `3+5`
+
+- Assigning values to objects with "<-", e.g.
+    x <- 3
+    - Some restrictions on naming objects e.g. cannot start with numbers, best to avoid "." 
+    - When setting an object it will appear in the environment panel (top right) 
+    - Can reassign values 
+
+```{r creating_objects}
+# test here
+```
+
+### Challenge 1
+
+What will be the value of the variable after each statement? 
+
+```{r challenge1}
+# first work out the answer yourself, then run the code block to check for answers
+mass <- 47.5
+age <- 122
+mass <- mass * 2.3
+age <- age - 20
+```
+
+## Comments
+
+- Anything to the right of #
+    - `# this is a comment`
+    - `mass <- 47.5 # anything from here on are comments`
+
+## Functions 
+
+R has many built-in functions. Try the following commands and guess what each function does
+
+```{r built_in_functions}
+round(3.14159)
+round(3.14159, 2) # 2 is how many digits 
+args(round)       # What type of input(arguments) it takes 
+?round            # Get help
+```
+
+## Vectors and data types 
+
+-   a set of values in a certain order of the same data type
+-   we can create a vector of animal weights and assign it to a new object
+    ```r
+    weight_g <- c(50, 60, 65, 82)
+    weight_g
+    ```
+-   Create a vector of a list of animals 
+    ```r
+    animals <- c("mouse", "rat", "dog")
+    animals 
+    # note that the double quotes ("") are important.
+    # If they aren’t there then R will assume this objects have already been created
+    ```
+-   check the data type of the objects
+    `class(animals)`
+-   Adding to your vector 
+    ```r
+    weight_g <- c(weight_g, 90) 
+    weight_g
+    ```
+-   6 types of atomic vectors 
+    -   "logical" for TRUE and FALSE (the boolean data type)
+    -   "integer" for integer numbers (e.g., 2L, the L indicates to R that it’s an integer)
+    -   "complex" to represent complex numbers with real and imaginary parts (e.g., 1 + 4i) and that’s all we’re going to say about them
+    -   "raw" for bitstreams
+    -   "Character"
+    -   "Numeric" 
+    -   typeof() tells you the type of a variable
+    
+```{r vector_and_data_test}
+# test your code here
+```
+
+### Challenge 2 
+
+What happens in each of these examples? (use class() to check data type of to the objects) 
+
+```{r challenge2}
+num_char <- c(1, 2, 3, "a")
+
+char_logical <- c("a", "b", "c", TRUE)
+```
+
+
+## Subsetting vectors 
+
+Can you figure out how to refer to various elements in a vector?
+
+```{r subsetting_vectors}
+animals <- c("mouse", "rat", "dog", "cat")
+animals[2] 
+
+more_animals <- animals[c(1, 2, 3, 2, 1, 4)]  # creating a vector with more elements than the original one 
+more_animals 
+```
+
+## Missing data
+
+NA if the data is missing a value 
+Try the following code
+```{r missing_data}
+heights <- c(2, 4, 4, NA, 6)
+heights 
+
+mean(heights, na.rm = TRUE)   # na.rm allows the result to be calculated while ignoring the missing data 
+```
+
+
+### Challenge 3
+
+What does each of the functions do?
+- `is.na()`
+- `na.omit()`
+- `complete.cases()`
+
+```{r challenge3}
+heights <- c(63, 69, 60, 65, NA, 68, 61, 70, 61, 59, 64, 69, 63, 63, NA, 72, 65, 64, 70, 63, 65)
+
+heights[! is.na(heights)] 
+
+na.omit(heights)
+
+heights[complete.cases(heights) ] 
+```
+
+Starting with Data  
+==================
+
+This second part of the workshop is based on the following source:
+
+- [https://datacarpentry.org/R-ecology-lesson/02-starting-with-data.html](https://datacarpentry.org/R-ecology-lesson/02-starting-with-data.html)
+
+## Set up the folders and get the data
+
+1. Use the terminal (or terminal pane in RStudio) to navigate to the folder where you downloaded this R markdown file.
+1. Create the following folders
+    ```bash
+    $ mkdir data_raw
+    $ mkdir data
+    $ mkdir fig
+    ```
+
+```{r download_and_import_data}
+download.file(url="https://ndownloader.figshare.com/files/2292169",
+              destfile = "data_raw/portal_data_joined.csv")  # destfile is the file you are saving it to and 
+                                                             # the file will be named portal_data_joined.csv 
+
+surveys <- read.csv("data_raw/portal_data_joined.csv")       # will not see any output but should see it appear 
+                                                             # in the environment panel 
+
+head(surveys)   # will show the first 6 lines of the file 
+```
+
+## Data frames
+
+The representation of data in the format of a table where the columns are vectors that all have the *same length*. Because columns are vectors, *each column must contain a single type of data (e.g., characters, integers, factors)*.
+
+![Illustration of Data Frame](https://datacarpentry.org/R-ecology-lesson/img/data-frame.svg)
+
+The following command can be used to see the structure of a data frame
+
+- Size:
+    -   `dim(surveys)` - returns a vector with the number of rows in the first element, and the number of columns as the second element (the dimensions of the object)
+    -   `nrow(surveys)` - returns the number of rows
+    -   `ncol(surveys)` - returns the number of columns
+- Content:
+    -   `head(surveys)` - shows the first 6 rows
+    -   `tail(surveys)` - shows the last 6 rows
+- Names:
+    -   `names(surveys)` - returns the column names (synonym of `colnames()` for `data.frame` objects)
+    -   `rownames(surveys)` - returns the row names
+- Summary:
+    -   `str(surveys)` - structure of the object and information about the class, length and content of each column
+    -   `summary(surveys)` - summary statistics for each column
+    
+```{r data_frame_practice}
+# test the above code here
+str(surveys)    # allows you to investigate the structure of the data frame` 
+```
+
+### Challenge
+
+Based on the output of `str(surveys)`, can you answer the following questions?
+
+-   What is the class of the object `surveys`?
+-   How many rows and how many columns are in this object?
+-   How many species have been recorded during these surveys?
+
+_Write your answers below in markdown_
+
+## Indexing and subsetting data frames 
+
+Q: What is "indexing" and "subsetting"?
+
+A: Extract specific data from the data frame
+
+Example:
+`surveys[1,1]` extracts the value in row 1 nd column 1 of the data frame.
+
+### Challenge
+
+Try the code below and figure out what each one does. Put your answer next to the comment sign.
+- first element in the first column of the data frame (as a vector)
+
+    `surveys[1, 1]`
+
+- first element in the 6th column (as a vector)
+
+    `surveys[1, 6]`
+
+- first column of the data frame (as a vector)
+
+    `surveys[, 1]`
+
+- first column of the data frame (as a data.frame)
+
+    `surveys[1]`
+
+- first three elements in the 7th column (as a vector)
+
+
+```{r indexing_and_subsetting}
+surveys[1,1]            #
+surveys[1,6]            #
+# the commands below (without the str()) result in large amount of output
+# we use str() to take a peek into it. it also helps us to understand the data type
+# each command gives
+str(surveys[ ,1])       # 
+str(surveys[1])         #
+str(surveys[1:3,7])          # 
+str(surveys[,-1])            # 
+str(surveys["species_id"])   # 
+str(surveys[,"species_id"])  # 
+```
+
+
+### A harder challenge
+
+1. Create a data.frame (name it `surveys_200`) containing only the data in row 200 of the surveys dataset.
+2. Notice how `nrow()` gave you the number of rows in a data.frame?
+
+    - Use that number to pull out just that last row in the data frame.
+    - Compare that with what you see as the last row using tail() to make sure it’s meeting expectations.
+    - Pull out that last row using `nrow()` instead of the row number.
+    - Create a new data frame (name it `surveys_last`) from that last row.
+3. Use `nrow()` to extract the row that is in the middle of the data frame. Store the content of this row in an object named surveys_middle.
+4. Combine `nrow()` with the - notation above to reproduce the behavior of head(surveys), keeping just the first through 6th rows of the surveys dataset.
+
+## Factors 
+
+-   Represent categorical data 
+-   Stored as integers associated with labels 
+    - Can look and act like character vectors but are integer vectors 
+-   Pre-defined set of values known as **levels**
+    -   Levels are sorted alphabetically 
+
+```{r factors_1}
+sex <- factor(c("male", "female", "female", "male"))
+sex
+levels(sex)     # notice how f comes before m
+nlevels(sex)    # tells you the number of levels
+# now this is a bit strange -- factors are actually stored as integers in R
+as.numeric(sex) # can you figure out which is 1 and which is 2?
+```
+
+It is possible to reorder levels 
+
+```{r factors_2}
+sex   # original order 
+sex <- factor(sex, levels = c("male", "female"))     # reorder to assign 1 to male and 2 to female 
+sex # after reordering 
+as.numeric(sex) # what did you notice?
+```
+
+### Converting factors 
+
+If you have a factor where the levels are numbers, say year, and if you want to get those levels **as numbers**, the conversion can be tricky. `as.numeric()` will not give you the desired outcome, because, remember, factors are stored as integers in the memory. `as. numeric` will give you the 1s and 2s, not the levels you want. There are a couple of ways to do this
+
+Can convert a factor to a character vector `as.character(sex)`
+
+```{r factors_conversion}
+year_fct <- factor(c(1990, 1983, 1977, 1998, 1990))
+as.numeric(year_fct)                    # wrong! and there is no warning!
+as.numeric(as.character(year_fct))      # Works, first to character then to numeric
+as.numeric(levels(year_fct))[year_fct]	# Can you understand how this works?
+as.numeric(levels(year_fct))	          # How about this one? Why is it different?
+```
+
+- We obtain all the factor levels using `levels(year_fct)`
+- We convert these levels to numeric values using `as.numeric(levels(year_fct))`
+- We then access these numeric values using the underlying integers of the vector `year_fct` inside the square brackets
+
+### Renaming Factors 
+
+When your data is stored as a factor, you can use the `plot()` function to get a quick look at the number of observations represented by each factor level.
+
+`r plot(surveys$sex)  # did you notice something odd?`
+
+```{r renaming_factor}
+sex <- surveys$sex   # pull out the data on sex 
+head(sex)            # quick look to make sure you have the correct data 
+levels(sex)          # to see what the levels are 
+
+levels(sex)[1] <- "undetermined"   # taking the first level and naming it "undetermined"
+levels(sex) # levels after renaming 
+head(sex)   # the file after renaming 
+plot(sex)   # Did the new label appear? 
+```
+
+### Challenge
+
+-   Rename "F" and "M" to "female" and "male" respectively.
+-   Now that we have renamed the factor level to "undetermined", can you recreate the barplot such that "undetermined" is last (after "male")?
+
+```{r factor_challenge}
+# test your knowledge here
+```
+
+### Using `stringsAsFactors=FALSE`
+
+
+By default, when building or importing a data frame, the columns that contain characters (i.e. text) are coerced (= converted) into factors. Depending on what you want to do with the data, you may want to keep these columns as character. To do so, `read.csv()` and `read.table()` have an argument called `stringsAsFactors` which can be set to FALSE.
+
+    In most cases, it is preferable to set `stringsAsFactors = FALSE` when importing data and to convert as a factor only the columns that require this data type.
+
+```{r use_stringAsFactors}
+# Compare the difference between our data read as `factor` vs `character`.
+surveys <- read.csv("data_raw/portal_data_joined.csv", stringsAsFactors = TRUE)
+str(surveys)
+
+# Now turn that off
+surveys <- read.csv("data_raw/portal_data_joined.csv", stringsAsFactors = FALSE)
+str(surveys)
+```
+
+### A tricky challenge
+
+1. We have seen how data frames are created when using `read.csv()`, but they can also be created by hand with the `data.frame()` function. There are a few mistakes in this hand-crafted data.frame. Can you spot and fix them? Don’t hesitate to experiment!
+
+```{r data_frame_challenge_1}
+# correct the mistakes and then remove the "#" at the beginning, execute the code block to see if it runs successfully
+animal_data <- data.frame(
+# animal = c(dog, cat, sea cucumber, sea urchin),
+# feel = c("furry", "squishy", "spiny"),
+# weight = c(45, 8 1.1, 0.8)
+)
+```
+
+2.  Can you predict the class for each of the columns in the following example? Check your guesses using str(country_climate):
+    -   Are they what you expected? Why? Why not?
+    -   What would have been different if we had added stringsAsFactors = FALSE when creating the data frame?
+    -   What would you need to change to ensure that each column had the accurate data type?
+
+```{r data_frame_challenge2}
+country_climate <- data.frame(
+  country = c("Canada", "Panama", "South Africa", "Australia"),
+  climate = c("cold", "hot", "temperate", "hot/temperate"),
+  temperature = c(10, 30, 18, "15"),
+  northern_hemisphere = c(TRUE, TRUE, FALSE, "FALSE"),
+  has_kangaroo = c(FALSE, FALSE, FALSE, 1)
+)
+```
+
+## Formatting Dates
+
+Store each component of your date and time information to ensure that it is accessible for analyses. Use `str()` to do this:
+
+`r str(surveys)`
+
+We are going to use the `ymd()` function from the package **lubridate** (which belongs to the **tidyverse**). **lubridate** gets installed as part of the **tidyverse** installation. When you load the **tidyverse** (`library(tidyverse)`), the core packages (the packages used in most data analyses) get loaded. **lubridate** however does not belong to the core tidyverse, so you have to load it explicitly with `library(lubridate)`
+
+
+### Challenge
+
+Start by loading the required package:
+
+`r library(lubridate)`
+
+`ymd()` takes a vector representing year, month, and day, and converts it to a Date vector. Date is a class of data recognized by R as being a date and can be manipulated as such. The argument that the function requires is flexible, but, as a best practice, is a character vector formatted as "YYYY-MM-DD".
+
+Let’s create a date object and inspect the structure:
+
+```{r formatting_dates}
+my_date <- ymd("2015-01-01")
+str(my_date)
+
+# Now let’s paste the year, month, and day separately - we get the same result:
+my_date <- ymd(paste("2015", "1", "1", sep = "-")) # sep indicates the character to use to separate each component
+str(my_date)
+
+# Now we apply this function to the surveys dataset. Create a character vector from the year, month, and day columns of surveys using paste():
+dates <- paste(surveys$year, surveys$month, surveys$day, sep = "-")
+
+# This character vector can be used as the argument for ymd():
+datesFormatted <- ymd(dates)
+
+# The resulting Date vector can be added to surveys as a new column called date:
+surveys$date <- datesFormatted
+str(surveys) # notice the new column, with 'date' as the class
+
+# Let’s make sure everything worked correctly. One way to inspect the new column is to use summary()
+summary(surveys$date)
+```
+
+Something went wrong: some dates have missing values. Let’s investigate where they are coming from.
+
+We can use the functions we saw previously to deal with missing data to identify the rows in our data frame that are failing. If we combine them with what we learned about subsetting data frames earlier, we can extract the columns "year,"month","day" from the records that have NA in our new column date. We will also use `head()` so we don’t clutter the output:
+
+```{r formatting_dates_troubleshooting}
+missing_dates <- surveys[is.na(surveys$date), c("year", "month", "day")]
+head(missing_dates)
+```
+
+Why did these dates fail to parse? If you had to use these data for your analyses, how would you deal with this situation?

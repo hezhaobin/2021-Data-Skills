@@ -1,0 +1,289 @@
+---
+title: "RStudio Units 5 and 6"
+author: "Jessica Zimmerman"
+date: "3/17/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Before getting started, we need to set the working directory (this is mine for this unit)
+
+```{r}
+setwd("~/Teaching_R_wk1")
+```
+
+## Now let's start trying to manipulate data frames
+### First we'll practice adding and removing rows and columns
+
+```{r}
+age <- c(2, 3, 5)
+cats <- read.csv(file = "feline-data.csv", stringsAsFactors = TRUE)
+```
+
+We have a data frame and a new vector that we want to add to that data frame. We can add a new column using the cbind command:
+
+```{r}
+cbind(cats, age)
+```
+
+This creates the new column but doesn't change our original data unless we reassign it to the 'cats' variable. Let's go ahead and do that:
+
+```{r}
+cats <- cbind(cats, age)
+```
+
+R won't let you add a new column if the number of things in the vector to be added don't match up with the number of rows in your data frame. For example, this will give an error because there are too many ages:
+
+```
+age_failed <- c(2, 3, 5, 12)
+cbind(cats, age_failed)  
+```
+
+Let's create a vector with information about a new cat that we want to add as a new row on our cats data frame:
+
+```{r}
+newRow <- list('tortoiseshell', 3.3, TRUE, 9)
+```
+
+If we add this row with the command 'rbind', we will see that it only sort of works:
+
+```{r}
+cats <- rbind(cats, newRow)
+cats
+```
+
+This is because 'tortoiseshell' wasn't in our original list of possible factors for the coat color, as we see if we look at the levels below. In order for R to recognize it as a possibility (and not give it the NA), we need to add it as a possible level of the factor:
+
+```{r}
+levels(cats$coat)
+levels(cats$coat) <- c(levels(cats$coat), "tortoiseshell")
+levels(cats$coat)
+```
+
+Now we should be able to add the row with the new cat's information:
+
+```{r}
+cats <- rbind(cats, newRow)
+cats
+```
+
+But wait, now we have an extra row. Let's remove it! There are multiple ways to do this, first by removing the row by its number and second by removing the rows that contain 'NA':
+
+```{r}
+cats[-4,] 
+```
+
+```{r}
+na.omit(cats)
+```
+
+Great! Now let's permanently remove the bad row by reassigning this to our cats variable:
+
+```{r}
+cats <- na.omit(cats)
+cats
+```
+
+We can remove columns similarly, putting the information about the columns after the comma in our square brackets:
+
+```{r}
+cats[,-4]
+```
+
+There's also a special way that we can remove a column by searching for it by name. In this example, we're looking for the vector named "age" in our cats file by creating the variable 'drop' and telling R we want everything except that:
+
+```{r}
+drop <- names(cats) %in% c("age")
+cats[,!drop]
+```
+
+You can use the gapminder data set to practice and explore these functions even more. Let's load that data and show a couple more key points before moving on. 
+
+```{r}
+gapminder <- read.csv(file = "gapminder_data.csv", stringsAsFactors = TRUE)
+```
+
+Let's look at the structure of the gapminder data:
+
+```{r}
+str(gapminder)
+```
+
+We can see that we have a data frame consisting of 6 different vectors of various types. We could also use another function if we wanted to just know the column names:
+
+```{r}
+colnames(gapminder)
+```
+
+Let's focus on one tricky point about factors using the country column.
+
+```{r}
+typeof(gapminder$country)
+str(gapminder$country)
+```
+
+But wait, why did we get two different answers with these functions? The answer is how R stores the information. For factors, it stores them as integers assigned to a label. So, when we ask the type of data, it tells us integer, but the structure of the data is actually a factor. 
+
+Here's one last thing to remember about the determining the dimensions of data frames:
+
+```{r}
+length(gapminder)
+```
+
+You might have expected this to give us the number of rows in the data frame, but that's not how R works. Since the data frame is a collection of vectors, the length of the data frame is actually the number of vectors in it. If we want the number of rows or columns, we need to use different functions:
+
+```{r}
+nrow(gapminder)
+ncol(gapminder)
+dim(gapminder)
+```
+
+
+## Now let's do a brief introduction to subsetting data
+### For vectors, much of the subsetting is similar to what we have learned in Python, so let's breeze through a few examples, highlighting the differences.
+#### The biggest difference to highlight - we count starting at 1 and **NOT** 0!
+
+Let's start with a named vector to demonstrate these concepts:
+
+```{r}
+x <- c(5.4, 6.2, 7.1, 4.8, 7.5)
+names(x) <- c('a', 'b', 'c', 'd', 'e')
+x
+```
+
+If we want to extract more than one thing from the vector, we use c() inside the square brackets to indicate what we want:
+
+```{r}
+x[c(1,3)]
+```
+
+We can also use a colon to indicate a range of things to extract:
+
+```{r}
+x[1:4]
+```
+
+Using a minus sign can tell R that we want everything *except* what we put in the square brackets, but the syntax is important. For example, this will work:
+
+```{r}
+x[c(-1, -5)]
+```
+
+But this will not:
+
+```
+x[-1:3]
+```
+
+Instead, we need to put the minus sign outside of parentheses and then we will get what we actually wanted:
+
+```{r}
+x[-(1:3)]
+```
+
+You can also extract things by name. This is particularly important syntax to know if there is more than one thing with the same name in the vector because this format will return all of the values and not just the first occurrence:
+
+```{r}
+x[names(x) == 'a']
+```
+
+Skipping named elements of a vector can be tricky because of the syntax, so let's spend some time on this. We can't use the minus sign to exclude things by name, but we can slightly modify the syntax we just learned instead:
+
+```{r}
+x[names(x) != 'a']
+```
+
+Now we get everything except 'a'. But it gets trickier if you want to exclude more than one named variable - we can't just use our c() trick to add more than one thing. This would give an error:
+
+```
+x[names(x) != c('a','c')]
+```
+
+This is because R treats c('a','c') as another vector, not two individual things. Let's run another function that can help illustrate what is happening here:
+
+```{r}
+names(x) != c('a', 'c')
+```
+
+The FALSE in the first position occurs because 'a' is actually equal to 'a'. In the second position, 'c' is not equal to 'b', so this is TRUE. Then, R recycles our vector that we're trying to exclude. This means that the 'a' gets matched up with 'c' and the 'c' gets matched up with 'd' - so both return TRUE because of this recycling process. 'a' gets recycled again to match up with 'e', which gives us the final TRUE, and 'c' gets left hanging and gives the error about not being a multiple. 
+
+So, if we actually want to exclude multiple named elements, we need to change our syntax to look for both 'a' and 'c' in the names of x and exclude those:
+
+```{r}
+x[! names(x) %in% c('a','c')]
+```
+
+
+### Factor and list subsetting work very similarly to vector subsetting, so let's just show a couple key points
+
+For factors, if you remove a factor which was only present once in the factor, you will *not* remove the level. Compare these two subsetting examples:
+
+```{r}
+f <- factor(c('a','a','b','c','c','d'))
+f[1:3]
+f[-3]
+```
+
+For lists, we need to use double square brackets to extract data rather than single square brackets if we want to see the data. Compare these two examples:
+
+```{r}
+xlist <- list(a = "Software Carpentry", b = 1:10, data = head(mtcars))
+xlist[1]
+xlist[[1]]
+```
+
+There are also a couple of things you can't do. First, you can't extract more than one thing at a time. This will give an error:
+
+```
+xlist[[1:2]]
+```
+
+You also can't extract everything *except* one thing. This will also give an error:
+
+```
+xlist[[-1]]
+```
+
+However, you *can* use names to extract from lists. There are two ways to do this:
+
+```{r}
+xlist[["a"]]  
+xlist$data
+```
+
+### Subsetting matrices can seem a little more confusing, so let's spend a little time on this.
+#### The key here is to remember you need to give two arguments - row and column
+
+Let's start with a randomly generated matrix with 6 rows and 4 columns:
+
+```{r}
+set.seed(1)     
+m <- matrix(rnorm(6*4), ncol=4, nrow=6)
+m 
+```
+
+Now we can give row and/or column information to tell R what we want to keep. We can compare these to the full matrix to help illustrate where they are coming from and the order that they are being extracted:
+
+```{r}
+m[3:4, c(3,1)]      # pulls rows 3 and 4, columns 3 and 1 (in that order)
+m[ , c(3,4)]        # just pulls columns 3 and 4, all rows
+```
+
+One thing to be aware of when extracting a single row of a matrix is that R will convert this to a vector as a default rather than keep the matrix format:
+
+```{r}
+m[3,]
+```
+
+There's a simple fix to this - just add another argument after where the column information would be to turn off that default behavior:
+
+```{r}
+m[3, , drop=FALSE]  
+```
+

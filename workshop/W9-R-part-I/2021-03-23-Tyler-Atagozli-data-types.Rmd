@@ -1,0 +1,167 @@
+# Data Structure
+
+## Vectors and Type Coercion 
+A vector in R is essentially an ordered list of things, with the special condition that everything in the vector must be the same basic data type. If you don’t choose the datatype, it’ll default to logical; or, you can declare an empty vector of whatever type you like.
+If you type 
+str(cats$weight)
+
+The output will be: 
+ num [1:3] 2.1 5 3.2
+This indicates the values in the vector are numbers, and there's 3 such values
+
+To make vectors use the combine function 
+```{r}
+combine_vector <- c(2,6,3)
+combine_vector
+```
+This made a vector called combine_vector. The output of str(combine_vector) will be:
+ num [1:3] 2 6 3
+
+The types of data in a vector *have* to be the same. If not R will change one data type to another. For example, the input
+```{r}
+another_coercion_vector <- c(0, TRUE)
+another_coercion_vector
+```
+Returns the output
+[1] 0 1
+Where True became 1. 
+The coercion rules go: logical -> integer -> numeric -> complex -> character, where -> can be read as are transformed into. You can try to force coercion against this flow using the as. functions:
+```
+character_coerced_to_numeric <- as.numeric(character_vector_example)
+character_coerced_to_numeric
+```
+Output
+[1] 0 2 4
+
+```
+numeric_coerced_to_logical <- as.logical(character_coerced_to_numeric)
+numeric_coerced_to_logical
+``` 
+Output
+[1] FALSE  TRUE  TRUE
+
+The combine function, c(), will append things to an existing vector, In this example, we'll make a new vector "ab" and then combine SWC into it
+```{r}
+ab_vector <- c('a', 'b')
+ab_vector
+```
+[1] "a" "b"
+```{r}
+combine_example <- c(ab_vector, 'SWC')
+combine_example
+```
+You can also make series of numbers:
+```{r}
+mySeries <- 1:10
+mySeries
+seq(10)
+``` 
+ [1]  1  2  3  4  5  6  7  8  9 10
+
+We can ask a few questions about vectors:
+```{r}
+sequence_example <- seq(10)
+head(sequence_example, n=2)
+``` 
+[1] 1 2
+```{r} 
+tail(sequence_example, n=4)
+``` 
+[1]  7  8  9 10
+```{r}
+length(sequence_example)
+class(sequence_example)
+typeof(sequence_example)
+```
+[1] 10
+[1] "integer"
+[1] "integer"
+
+Finally, you can give names to elements in your vector:
+```{r} 
+my_example <- 5:8
+names(my_example) <- c("a", "b", "c", "d")
+my_example
+``` 
+a b c d 
+5 6 7 8 
+
+```{r}
+names(my_example)
+```
+[1] "a" "b" "c" "d"
+
+### Challenge 1: 
+Start by making a vector with the numbers 1 through 26. Multiply the vector by 2, and give the resulting vector names A through Z (hint: there is a built in vector called LETTERS)
+I left the answer out of the worksheet, but if you're struggling, you can find it on the [workshop](http://swcarpentry.github.io/r-novice-gapminder/04-data-structures-part1/index.html) 
+
+## Data Frames
+We said that columns in data.frames were vectors (so the weight and likes_string are columns:
+```
+str(cats$weight)
+str(cats$likes_string)
+``` 
+ num [1:3] 2.1 5 3.2
+ logi [1:3] TRUE FALSE TRUE
+
+Data frames have column names, which can be accessed with the names() function.
+```
+names(cats)
+``` 
+[1] "coat"         "weight"       "likes_string"
+If you want to rename the second column of cats, you can assign a new name to the second element of names(cats).
+``` 
+    coat weight_kg likes_string
+1 calico       2.1         TRUE
+2  black       5.0        FALSE
+3  tabby       3.2         TRUE
+```
+
+## Factors
+Another important data structure is called a factor. Factors usually look like character data, but are typically used to represent categorical information. For example, let’s make a vector of strings labelling cat colorations for all the cats in our study:
+```
+coats <- c('tabby', 'tortoiseshell', 'tortoiseshell', 'black', 'tabby')
+coats
+``` 
+[1] "tabby"         "tortoiseshell" "tortoiseshell" "black"        
+[5] "tabby
+```
+str(coats)
+``` 
+ chr [1:5] "tabby" "tortoiseshell" "tortoiseshell" "black" "tabby"
+
+We can turn a vector into a factor like so:
+```
+CATegories <- factor(coats)
+class(CATegories)
+```
+[1] "factor"
+```
+str(CATegories)
+```
+ Factor w/ 3 levels "black","tabby",..: 2 3 3 1 2
+
+Now R has noticed that there are three possible categories in our data - but it also did something surprising; instead of printing out the strings we gave it, we got a bunch of numbers instead. R has replaced our human-readable categories with numbered indices under the hood, this is necessary as many statistical calculations utilise such numerical representations for categorical data:
+```
+typeof(coats)
+``` 
+[1] "character"
+```
+typeof(CATegories)
+```
+[1] "integer"
+
+### Challenge 2
+Is there a factor in our cats data.frame? what is its name? Try using ?read.csv to figure out how to keep text columns as character vectors instead of factors; then write a command or two to show that the factor in cats is actually a character vector when loaded in this way.
+See answer in [workshop](http://swcarpentry.github.io/r-novice-gapminder/04-data-structures-part1/index.html) 
+
+In modelling functions, it’s important to know what the baseline levels are. This is assumed to be the first factor, but by default factors are labelled in alphabetical order. You can change this by specifying the levels:
+
+``` 
+mydata <- c("case", "control", "control", "case")
+factor_ordering_example <- factor(mydata, levels = c("control", "case"))
+str(factor_ordering_example)
+``` 
+ Factor w/ 2 levels "control","case": 2 1 1 2
+
+
