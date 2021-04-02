@@ -1,0 +1,6 @@
+Mus_musculus.GRCm38.75.dna.chromosome.8.fa.gz
+Mus_musculus.GRCm38.75.dna.chromosome.8.fa.fai
+seqtk
+samtools
+sickle
+__pycache__
