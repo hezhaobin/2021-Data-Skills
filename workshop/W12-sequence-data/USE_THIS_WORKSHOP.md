@@ -30,7 +30,6 @@ module load stack/2020.1 # required for loading samtools/1.10
 module load samtools/1.10_intel-19.0.5.281
 samtools --version # testing to make sure that it works
 ```
-
 If you are on your own computer or on fastx environment (note that if you are on fastx, you can easily log on to ARGON and skip this step), then you will need to download the source code and compile the program yourself.
 
 1. Go to your terminal, create a directory to hold the source code, e.g. `~/sw`, and `cd` into that folder.
