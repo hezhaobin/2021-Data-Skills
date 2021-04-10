@@ -23,7 +23,7 @@
 #$ -m ea
 # ---------------- edit the following part ---------------
 #  E-mail address to send to (change <HawkID> to yours)
-#$ -M <HawkID>@uiowa.edu
+#$ -M cmhggns@uiowa.edu
 #---------------------------------------------------------
 
 # these are useful flags to set to make the code more robust to failure
