@@ -17,8 +17,7 @@
 #  Request 10 slots in a shared memory environment
 #$ -pe smp 10 
 #  Specify the directory to save the job logs
-#$ -o ./
-#$ -e ./
+#$ -j y
 #  Send e-mail at end/abort of job
 #$ -m ea
 # ---------------- edit the following part ---------------
@@ -29,6 +28,10 @@
 # these are useful flags to set to make the code more robust to failure
 # copied from Vince Buffalo's Bioinformatic Data Analysis book
 set -eo pipefail
+
+# load fastqc
+module load stack/2020.2
+module load fastqc
 
 # the actual command to run
 fastqc -t 10 -o ./ SRR6900282.fastq.gz
