@@ -214,6 +214,11 @@ for base in IUPAC_BASES:
     ```
 
 ## Indexed FASTA Files
+This example uses the mouse genome (Ensembl release 75) for an example. You can
+get this with:
+
+    $ wget ftp://ftp.ensembl.org/pub/release-75/fasta/mus_musculus/dna/Mus_musculus.GRCm38.75.dna.toplevel.fa.gz
+
 - Make sure you are working within /sequence-data/
 - Extracting numerous random subsequences from a FASTA file can be quite computationally costly.
 - A common computational strategy that allows for easy and fast random access is indexing the file. It allows us to easily extract subsequences
