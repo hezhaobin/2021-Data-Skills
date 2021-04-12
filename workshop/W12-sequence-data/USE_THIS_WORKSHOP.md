@@ -233,5 +233,5 @@ $ samtools faidx Mus_musculus.GRCm38.75.dna.chromosome.8.fa 8:123407082-12341074
 - `samtools faidx` allows for multiple regions at once, so we could do:
 
     ```bash
-    $ samtools faidx Mus_musculus.GRCm38.75.dna.chromosome.8.fa \ 8:123407082-123410744 8:123518835-123536649
+    $ samtools faidx Mus_musculus.GRCm38.75.dna.chromosome.8.fa 8:123407082-123410744 8:123518835-123536649
     ```
