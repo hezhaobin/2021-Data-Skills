@@ -1,0 +1,5 @@
+data/*
+!data/README.md
+script/job-log/*
+!script/job-log/README.md
+output/*
