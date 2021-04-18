@@ -1,0 +1,4 @@
+*.gz
+genome/*
+*.sam
+bwa.o*

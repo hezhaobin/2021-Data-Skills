@@ -31,6 +31,45 @@ Working With Alignment Data
     $ module avail samtools
     $ module load samtools
     ```
+## Align a fastq file to the genome
+The exercises from the textbook didn't demonstrate how SAM or BAM files are derived from fastq files. Here we merely provide an example for you to get hands-on practice. For a deep understanding of the mapping process, including the best aligner to use, you are referred to external resources such as this [youtube video](https://youtu.be/jA8RI4u_hd8), [a recent review](https://link.springer.com/article/10.1007/s13258-017-0621-9#Sec14) and [this tutorial](https://learn.gencore.bio.nyu.edu/alignment/)
+
+We will use the same file as the one used for the challenge in W11. Here is how you can obtain it:
+
+```bash
+# first make sure that you are in a safe directory (not a git version controlled one)
+# optional
+mkdir ~/Documents/W13
+cd ~/Documents/W13
+cp /Shared/class-BIOL_4386/W11-remote-computing/SRR6900282.fastq.gz ./
+less SRR6900282.fastq.gz # less can directly read gzipped file!
+```
+
+Now we need to index the genome, a pre-step to genome alignment. As this genome, belonging to a yeast, is fairly small and thus indexing it doesn't take much computing power, we will do this at the login node. If, however, you are indexing a large genome, such as that of human, or a plant with tens of gigabytes of bases, you MUST write a job script and submit it to the computing node! Plus, you will use a slightly different `bwa` command if the reference genome is greater than 2GB. Instead of `bwa index <ref.fna>`, you will use `bwa index -a bwtsw <ref.fna>`.
+```bash
+# download the genome sequences
+mkdir genome
+wget -nc ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/002/759/435/GCA_002759435.2_Cand_auris_B8441_V2/GCA_002759435.2_Cand_auris_B8441_V2_genomic.fna.gz -P ./genome/
+less ./genome/GCA_002759435.2_Cand_auris_B8441_V2_genomic.fna.gz # this file simply contains the genomic DNA sequence of the organism
+# build index
+module load bwa
+cd genome
+mv GCA_002759435.2_Cand_auris_B8441_V2_genomic.fna.gz Cand_auris_B8441.fna.gz # shorten the file name
+# bwa can work with gzipped files, so there is no need to decompress them
+bwa index ./Cand_auris_B8441.fna.gz
+ls    # you should see a few new files with the above name
+cd .. # go back to the parent folder
+```
+
+Last step is to actually perform the "mapping", i.e. align the short reads in the fastq file to the genome, thus generating the SAM files that we will study in more detail below. Mapping does take a large amount of computing power even for a small genome, so we are going to submit the job to the computing node. I already created a sample script called `bwa.sh`. Use `nano` or `vim` to edit it and then `qsub bwa.sh`. Use the skills you learned in W11 to confirm that the job has been successfully executed. The key command in that script is the `bwa` command below:
+
+```bash
+# don't actually run this at the command line
+# bwa mem ./genome/Cand_auris_B8441.fna.gz ./SRR6900282.fastq.gz > ./SRR6900282.aln.sam
+```
+
+Once you have submitted the job, use `qstat -u HawkID` to check the status of your job. You should first see the job in `r(unning)` status, and then disappear from the list, suggesting that the job is done. You can use `qacct -j JobID` (replace job ID with the actual ID you get after qsub) to check how much memory was used in the process (maxmem). Lastly, take a look at the output by `head ./SRR6900282.aln.sam`
+
 ## Learning about SAM and BAM formats
 1. The SAM header
 1. The SAM alignment section
