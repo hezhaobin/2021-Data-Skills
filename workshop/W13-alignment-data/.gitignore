@@ -3,3 +3,4 @@ genome/*
 *.sam
 *.bam*
 bwa.o*
+bwa.e*
