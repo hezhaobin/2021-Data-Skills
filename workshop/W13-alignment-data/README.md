@@ -7,6 +7,9 @@ date: 2020-04-02
 Working With Alignment Data
 =================
  
+## Introduction
+As you follow each step of the workshop, ask yourself if you understand the purpose of that step. For example, when you inspect the SAM file, think about why those information are needed (which are not part of a pairwise or multiple-sequence alignment)? Why do we need to convert SAM to BAM, why sort and index the BAM file?
+
 ## Before we start
  
 - This workshop is intended to be completed on the ARGON computing cluster at the University of Iowa.
@@ -32,7 +35,7 @@ Working With Alignment Data
     $ module load samtools
     ```
 ## Align a fastq file to the genome
-The exercises from the textbook didn't demonstrate how SAM or BAM files are derived from fastq files. Here we merely provide an example for you to get hands-on practice. For a deep understanding of the mapping process, including the best aligner to use, you are referred to external resources such as this [youtube video](https://youtu.be/jA8RI4u_hd8), [a recent review](https://link.springer.com/article/10.1007/s13258-017-0621-9#Sec14) and [this tutorial](https://learn.gencore.bio.nyu.edu/alignment/)
+The exercises from the textbook didn't demonstrate how SAM or BAM files are derived from fastq files. Here we  provide an example for you to get hands-on practice. For a deep understanding of the mapping process, including the best aligner to use, you are referred to external resources such as this [youtube video](https://youtu.be/jA8RI4u_hd8), [a recent review](https://link.springer.com/article/10.1007/s13258-017-0621-9#Sec14) and [this tutorial](https://learn.gencore.bio.nyu.edu/alignment/)
 
 We will use the same file as the one used for the challenge in W11. Here is how you can obtain it:
 
@@ -61,12 +64,14 @@ ls    # you should see a few new files with the above name
 cd .. # go back to the parent folder
 ```
 
-Last step is to actually perform the "mapping", i.e. align the short reads in the fastq file to the genome, thus generating the SAM files that we will study in more detail below. Mapping does take a large amount of computing power even for a small genome, so we are going to submit the job to the computing node. I already created a sample script called `bwa.sh`. Use `nano` or `vim` to edit it and then `qsub bwa.sh`. Use the skills you learned in W11 to confirm that the job has been successfully executed. The key command in that script is the `bwa` command below:
+Now we can actually perform the "mapping", i.e. align the short reads in the fastq file to the genome, thus generating the SAM files that we will study in more detail below. Mapping does take a large amount of computing power even for a small genome, so we are going to submit the job to the computing node. I already created a sample script called `bwa.sh`. Use `nano` or `vim` to edit it and then `qsub bwa.sh`. Use the skills you learned in W11 to confirm that the job has been successfully executed. The key command in that script is the `bwa` command below:
 
 ```bash
 # don't actually run this at the command line
 # bwa mem ./genome/Cand_auris_B8441.fna.gz ./SRR6900282.fastq.gz > ./SRR6900282.aln.sam
 ```
+
+Actually, the job script does more than just alignment. I've added three steps that you will learn about in the exercises below: converting the SAM file into a BAM file, then sorting and indexing the BAM file. This way you just have to submit one job and will get all the required files to play with the `samtools view` command.
 
 Once you have submitted the job, use `qstat -u HawkID` to check the status of your job. You should first see the job in `r(unning)` status, and then disappear from the list, suggesting that the job is done. You can use `qacct -j JobID` (replace job ID with the actual ID you get after qsub) to check how much memory was used in the process (maxmem). Lastly, take a look at the output by `head ./SRR6900282.aln.sam`
 
@@ -223,8 +228,10 @@ This is the total number of reads that are  mapped, paired, and not properly pai
 $ echo "201101 + 32527" | bc # bc stands for bench calculator
 ```
  
+Now that you have learned about the flags, can you apply these knowledge to inspect the `SRR6900282.sorted.bam` file? How many reads are there in total? Are they single-end or paired-end? How many of the reads are mapped vs unmapped? For an arbitrary region, e.g. PEKT02000007.1:3174268-3178011, how many reads map there?
+
 ## Visualizing Alignments with samtools tview and the Integrated Genomics Viewer
-### Overview of samtools tview
+### Overview of samtools tview (optional)
 The samtools tview tool is useful for quickly looking at alignments in the terminal. This tool can only be used on position-sorted and indexed BAM files. Previously, we indexed the BAM file "NA12891_CEU_sample.bam" which was already position-sorted. Make sure you are in the Chapter 11 folder for the book files and that you can find this file (ls). Another helpful feature of the tview subcommand is that it can load the reference genome alongside the alignments. 
  
 #### Download the Reference Genome (human_g1k_v37.fasta)
@@ -254,8 +261,9 @@ This opens the tview application which allows you to navigate around the chromos
 q # exit the tview window to access the IGV
 ```
 
-### The Integrated Genomics Viewer
-There are two ways you can access the IGV for this workshop:
+### The Integrated Genomics Viewer (recommended)
+To access the IGV for this workshop:
+1. Make sure that you have X11 forwarding turned on when you initiated `ssh`, like this: `ssh -Y hawkid@argon.hpc.uiowa.edu`
 1. Download IGV in Argon
     ```bash
     $ wget https://data.broadinstitute.org/igv/projects/downloads/2.8/IGV_Linux_2.8.2.zip
@@ -264,17 +272,10 @@ There are two ways you can access the IGV for this workshop:
     $ chmod a+x igv.sh # this makes the script executable
     $ ./igv.sh # this will execute the script and open the IGV in a new window
     ```
-2. Open the IGV Application in the fastx Environment
-    - Applications -> Bioinformatics -> IGV
-    - If you choose to use the version on your desktop, you will need to either transfer the sorted and indexed files we prepared above to your local directory or complete the previous exercises on files in your local directory.
- 
-    The first thing you need to do once IGV opens is load the reference genome. This can be done by navigating to Genomes -> Load Genome from Server -> and select "Human (1kg, b37+decoy)" genome. 
- 
-Next, we need to load the BAM alignments we want to look at: File -> Load from file -> NA12891_CEU_sample.bam
- 
-You should notice that no alignments are currently shown. The next step is to focus the IGV on a region that contains our alignments of interest. In the textbox at the top of the window, enter the region "1:215,906,528-215,906,567".
- 
-You should now see alignments on your screen. The top pane shows where on the chromosome the viewer is focused on and the base pair positions. The middle pane shows the coverage and alignment tracks. The bottom pane shows the sequence and gene track information. You will notice that some of the letters are colored in the bottom pane. This means that the bases are mismatched between the read sequence and the reference. What are some reasons that the bases would be mismatched?
+1. The first thing you need to do once IGV opens is load the reference genome. This can be done by navigating to Genomes -> Load Genome from Server -> and select "Human (1kg, b37+decoy)" genome. 
+1.  Next, we need to load the BAM alignments we want to look at: File -> Load from file -> NA12891_CEU_sample.bam
+1.  You should notice that no alignments are currently shown. The next step is to focus the IGV on a region that contains our alignments of interest. In the textbox at the top of the window, enter the region "1:215,906,528-215,906,567".
+1. You should now see alignments on your screen. The top pane shows where on the chromosome the viewer is focused on and the base pair positions. The middle pane shows the coverage and alignment tracks. The bottom pane shows the sequence and gene track information. You will notice that some of the letters are colored in the bottom pane. This means that the bases are mismatched between the read sequence and the reference. What are some reasons that the bases would be mismatched?
  
 We are going to take a closer look to see if we can determine the cause of the variation. Hover your cursor over the alignments in the region around positions 215,906,547 and 215,906,548. You should see that this particular region has lower mapping quality than if you hovered over other regions. Can you tell if this is a case of true polymorphism or misalignment by inspecting the different reads?
  
