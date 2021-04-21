@@ -129,6 +129,7 @@ $ ls # if the index command worked, you should have a file in your directory cal
 Once alignments have been sorted and indexed, you can filter out alignments you don't want to include in your analysis and extract the alignments of interest. What this means is that if you only want to analyze data on a specific chromosome or only a region of the chromosome, the command below allows you to "extract" just that part of the alignment from an otherwise huge BAM file.
 
 ```bash
+$ wget https://github.com/vsbuffalo/bds-files/raw/master/chapter-11-alignment/NA12891_CEU_sample.bam # obtain the file from the author's github repo
 $ samtools index NA12891_CEU_sample.bam # This is data from the 1000 Genomes Project
 $ samtools view NA12891_CEU_sample.bam 1:215906469-215906652 | head -n 3 # This command views some of the alignments in the region specified on chromosome 1
 $ samtools view -b NA12891_CEU_sample.bam 1:215906469-215906652 > USH2A_sample_alns.bam # This writes the alignments we viewed above in BAM format, note the "-b" flag. without it, the output will be in SAM format, even if you use .bam in the file name!
